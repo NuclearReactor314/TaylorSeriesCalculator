@@ -108,3 +108,14 @@ function start() {
     i++;
   }, 1000);
 }
+
+function downloadPlot() {
+  Plotly.downloadImage("plot", { format: "png", filename: "taylor_series" });
+}
+
+function toggleDarkMode() {
+  document.body.classList.toggle("dark");
+  Plotly.relayout("plot", {
+    template: document.body.classList.contains("dark") ? "plotly_dark" : "plotly_white"
+  });
+}
