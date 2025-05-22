@@ -1,12 +1,9 @@
 function preprocess(expr) {
-  // 替换所有 e^后面跟的项，比如 e^x 或 e^(x+1)
-  return expr.replace(/e\^(\([^)]*\)|[a-zA-Z0-9]+)/g, (match, g1) => {
-    return `exp${g1}`;
-  });
+  return expr.replace(/e\^(\([^)]*\)|[a-zA-Z0-9]+)/g, (m, g1) => `exp${g1}`);
 }
 
 function taylorApprox(expr, a, n, x) {
-  const node = math.parse(expr);
+  let node = math.parse(expr);
   let sum = 0;
   let derivative = node;
 
@@ -22,42 +19,58 @@ function taylorApprox(expr, a, n, x) {
 function generateData(expr, a, maxN) {
   const xValues = math.range(a - 5, a + 5, 0.1).toArray();
 
-  const original = {
+  const originalY = xValues.map(x => {
+    try {
+      const v = math.evaluate(expr, { x });
+      if (!isFinite(v)) throw new Error("Non-finite value");
+      return v;
+    } catch (e) {
+      console.warn(`Original f(x) eval error at x=${x}:`, e.message);
+      return NaN;
+    }
+  });
+
+  console.log("Original Y sample:", originalY.slice(0,5));
+
+  const originalTrace = {
     x: xValues,
-    y: xValues.map(x => {
-      try {
-        return math.evaluate(expr, { x });
-      } catch {
-        return NaN;
-      }
-    }),
+    y: originalY,
     name: 'Original f(x)',
-    line: { width: 3, color: '#1f77b4' },
+    mode: 'lines',
+    line: { width: 3, color: '#1f77b4' }
   };
 
-  const taylorSeries = [];
-  for (let n = 1; n <= maxN; n++) {
-    taylorSeries.push({
+  const taylorTraces = [];
+  for (let i = 1; i <= maxN; i++) {
+    const yVals = xValues.map(x => {
+      try {
+        const v = taylorApprox(expr, a, i, x);
+        if (!isFinite(v)) throw new Error("Non-finite value");
+        return v;
+      } catch (e) {
+        console.warn(`Taylor n=${i} eval error at x=${x}:`, e.message);
+        return NaN;
+      }
+    });
+    console.log(`Taylor n=${i} Y sample:`, yVals.slice(0,5));
+
+    taylorTraces.push({
       x: xValues,
-      y: xValues.map(x => {
-        try {
-          return taylorApprox(expr, a, n, x);
-        } catch {
-          return NaN;
-        }
-      }),
-      name: `Taylor n=${n}`,
-      visible: n === 1 ? true : 'legendonly',
-      line: { dash: 'dot' }
+      y: yVals,
+      name: `Taylor n=${i}`,
+      mode: 'lines',
+      line: { dash: 'dot' },
+      visible: i === 1 ? true : 'legendonly',
     });
   }
 
-  return [original, ...taylorSeries];
+  return [originalTrace, ...taylorTraces];
 }
 
 function start() {
   let expr = document.getElementById("functionInput").value.trim();
   expr = preprocess(expr);
+  console.log("Processed expr:", expr);
 
   const a = parseFloat(document.getElementById("aInput").value);
   const n = parseInt(document.getElementById("nInput").value);
@@ -67,41 +80,31 @@ function start() {
     return;
   }
 
+  let data;
   try {
-    const data = generateData(expr, a, n);
-    const layout = {
-      title: `Taylor Series Approximation of f(x) = ${expr}`,
-      xaxis: { title: "x" },
-      yaxis: { title: "y" },
-      template: document.body.classList.contains("dark") ? "plotly_dark" : "plotly_white",
-      legend: { orientation: "h", y: -0.3 },
-    };
-
-    Plotly.newPlot("plot", [data[0]], layout);
-
-    let i = 1;
-    const interval = setInterval(() => {
-      if (i > n) {
-        clearInterval(interval);
-      } else {
-        Plotly.addTraces("plot", data[i]);
-        i++;
-      }
-    }, 1000);
-
-  } catch (error) {
-    alert("Error evaluating function. Please check your input.");
-    console.error(error);
+    data = generateData(expr, a, n);
+  } catch (e) {
+    alert("Error processing function: " + e.message);
+    return;
   }
-}
 
-function downloadPlot() {
-  Plotly.downloadImage("plot", { format: "png", filename: "taylor_series" });
-}
+  const layout = {
+    title: `Taylor Series Approximation of f(x) = ${expr}`,
+    xaxis: { title: "x" },
+    yaxis: { title: "y" },
+    template: document.body.classList.contains("dark") ? "plotly_dark" : "plotly_white",
+    legend: { orientation: "h", y: -0.3 }
+  };
 
-function toggleDarkMode() {
-  document.body.classList.toggle("dark");
-  Plotly.relayout("plot", {
-    template: document.body.classList.contains("dark") ? "plotly_dark" : "plotly_white"
-  });
+  Plotly.newPlot("plot", [data[0]], layout);
+
+  let i = 1;
+  const interval = setInterval(() => {
+    if (i > n) {
+      clearInterval(interval);
+      return;
+    }
+    Plotly.addTraces("plot", data[i]);
+    i++;
+  }, 1000);
 }
