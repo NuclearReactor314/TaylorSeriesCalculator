@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Taylor Series Visualization</title>
+  <script src="https://cdn.jsdelivr.net/npm/mathjs@11.3.1/lib/browser/math.js"></script>
+  <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Taylor Series Visualization</h1>
+
+    <div class="form">
+      <label for="functionInput">Function <code>f(x) =</code></label>
+      <input type="text" id="functionInput" value="e^x" placeholder="e^x, sin(x), ln(1+x)">
+
+      <label for="aInput">Expand at <code>a =</code></label>
+      <input type="number" id="aInput" value="0" placeholder="e.g. 0">
+
+      <label for="nInput">Max degree <code>n =</code></label>
+      <input type="number" id="nInput" value="5" min="1" max="20">
+
+      <button onclick="start()">Start Animation</button>
+      <button onclick="downloadPlot()">Export Image</button>
+      <button onclick="toggleDarkMode()">Dark Mode</button>
+    </div>
+
+    <div id="plot"></div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

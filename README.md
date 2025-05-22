@@ -1,1 +1,1 @@
-# hamiltonGPT
+# Taylor Series Visualization

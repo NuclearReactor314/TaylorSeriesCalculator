@@ -1,0 +1,81 @@
+:root {
+  --bg: #f5f7fa;
+  --text: #333;
+  --card: #fff;
+  --border: #ccc;
+  --button: #4e79a7;
+  --button-hover: #355a7d;
+}
+
+body.dark {
+  --bg: #1e1e1e;
+  --text: #eee;
+  --card: #2c2c2c;
+  --border: #555;
+  --button: #4e79a7;
+  --button-hover: #638bba;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.3s ease, color 0.3s ease;
+}
+
+.container {
+  max-width: 800px;
+  margin: auto;
+  padding: 30px 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+  color: var(--text);
+}
+
+.form {
+  background: var(--card);
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  transition: background 0.3s ease;
+}
+
+label {
+  font-weight: bold;
+}
+
+input {
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+}
+
+button {
+  padding: 12px;
+  font-size: 16px;
+  background-color: var(--button);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+button:hover {
+  background-color: var(--button-hover);
+}
+
+#plot {
+  margin-top: 30px;
+  width: 100%;
+  height: 500px;
+}
